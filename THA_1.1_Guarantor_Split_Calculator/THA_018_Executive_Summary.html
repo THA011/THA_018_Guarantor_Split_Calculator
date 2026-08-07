@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>THA_1.1 — Guarantor Split Calculator | Executive Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #007A33;
+    --green-dark: #023B1B;
+    --green-mid: #005E27;
+    --gold: #C9A84C;
+    --ink: #1F2A22;
+    --muted: #5C6B62;
+    --paper: #FFFFFF;
+    --card: #F4F7F5;
+    --line: #E1E7E3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #EEF2EF;
+    color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .sheet { 
+    max-width: 900px; 
+    width: 100%; 
+    background: var(--paper); 
+    box-shadow: 0 1px 40px rgba(2,59,27,0.08);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- Header ---------- */
+  header.hero {
+    background: var(--green-dark);
+    color: #EAF3EC;
+    padding: 2.5rem 3.2rem 2rem;
+    position: relative;
+  }
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .hero-left { flex: 1; min-width: 200px; }
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+  }
+  .hero-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .hero-brand svg {
+    fill: var(--gold);
+    width: 32px;
+    height: 32px;
+    margin-bottom: 2px;
+  }
+  .hero-brand .brand-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    color: #FFFFFF;
+  }
+
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin: 0 0 0.8rem;
+  }
+  header.hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 2.6rem;
+    line-height: 1.08;
+    margin: 0 0 0.5rem;
+    color: #FFFFFF;
+  }
+  header.hero .subtitle {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--gold);
+    margin: 0 0 1.4rem;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.8rem;
+    font-size: 0.82rem;
+    color: #AFCBB9;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding-top: 1.1rem;
+  }
+  .meta-row strong { 
+    color: #DCEBE1; 
+    display: block; 
+    font-size: 0.7rem; 
+    letter-spacing: 0.06em; 
+    text-transform: uppercase; 
+    margin-bottom: 0.15rem; 
+    font-weight: 600;
+  }
+
+  /* ---------- Ledger strip (signature element) ---------- */
+  .ledger {
+    background: var(--green);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .ledger .cell {
+    padding: 1.5rem 1.6rem;
+    border-right: 1px solid rgba(255,255,255,0.18);
+  }
+  .ledger .cell:last-child { border-right: none; }
+  .ledger .label {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #CFE8D9;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+  .ledger .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #FFFFFF;
+  }
+  .ledger .value.gold { color: var(--gold); }
+
+  /* ---------- Body ---------- */
+  main { padding: 2.8rem 3.2rem 1rem; flex: 1; }
+  section { margin-bottom: 2.6rem; }
+  section:last-of-type { margin-bottom: 1.2rem; }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.4rem;
+    color: var(--ink);
+    margin: 0 0 0.9rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  h2 .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gold);
+  }
+  p { line-height: 1.65; font-size: 0.97rem; color: var(--ink); margin: 0 0 0.9rem; }
+  p.lede { font-size: 1.02rem; color: var(--muted); }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 0.55rem; margin: 1.1rem 0 0.4rem; }
+  .tag {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--green-mid);
+  }
+  .tag span { color: var(--muted); font-weight: 400; margin-left: 0.35rem; }
+
+  .feature-list { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+  .feature-list li {
+    display: flex;
+    gap: 0.8rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.93rem;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list .mark {
+    flex: none;
+    width: 1.4rem; height: 1.4rem;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 0.1rem;
+  }
+  .feature-list b { display: block; color: var(--ink); }
+  .feature-list span.desc { color: var(--muted); }
+
+  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-top: 1rem; }
+  .method-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.3rem 1.4rem;
+  }
+  .method-card h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    margin: 0 0 0.5rem;
+    color: var(--green-mid);
+  }
+  .method-card ol { margin: 0.6rem 0 0; padding-left: 1.15rem; }
+  .method-card li { font-size: 0.87rem; color: var(--ink); margin-bottom: 0.4rem; line-height: 1.5; }
+  .formula {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    background: var(--green-mid);
+    color: #EAF3EC;
+    padding: 0.7rem 0.85rem;
+    border-radius: 6px;
+    margin: 0.6rem 0 0.2rem;
+  }
+
+  /* Mobile-friendly table */
+  .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -0.5rem; padding: 0 0.5rem; }
+  table { width: 100%; border-collapse: collapse; margin-top: 0.6rem; font-size: 0.88rem; min-width: 480px; }
+  thead th {
+    text-align: left;
+    background: var(--green-mid);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.6rem 0.7rem;
+  }
+  tbody td {
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid var(--line);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+  }
+  tbody td:first-child { font-family: 'Inter', sans-serif; font-weight: 600; }
+  tbody tr:nth-child(even) { background: #FAFCFA; }
+  tbody tr.total td { font-weight: 700; background: var(--card); border-top: 2px solid var(--green); }
+
+  .metric-table td:nth-child(2) { font-family: 'Inter', sans-serif; color: var(--muted); }
+
+  .stack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.9rem; margin-top: 1rem; }
+  .stack-item {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.9rem 0.85rem;
+    background: var(--card);
+  }
+  .stack-item .code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .stack-item b { display: block; font-size: 0.85rem; margin: 0.25rem 0 0.2rem; }
+  .stack-item p { font-size: 0.78rem; color: var(--muted); margin: 0; line-height: 1.4; }
+
+  .deploy-box {
+    background: var(--green);
+    color: #EAF3EC;
+    border-radius: 10px;
+    padding: 1.3rem 1.5rem;
+    margin-top: 1rem;
+  }
+  .deploy-box b { color: #fff; display: block; margin-bottom: 0.5rem; font-family: 'Fraunces', serif; font-size: 1.02rem; }
+  .deploy-box ol { margin: 0; padding-left: 1.2rem; }
+  .deploy-box li { font-size: 0.87rem; margin-bottom: 0.35rem; }
+  .deploy-box code { background: rgba(255,255,255,0.15); padding: 0.1rem 0.35rem; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; }
+
+  .privacy-note {
+    border-left: 3px solid var(--gold);
+    background: var(--card);
+    padding: 0.9rem 1.1rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    border-radius: 0 6px 6px 0;
+  }
+
+  footer {
+    background: var(--green-dark);
+    color: #AFCBB9;
+    padding: 1.6rem 3.2rem;
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  footer .footer-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  footer .footer-brand svg {
+    fill: var(--gold);
+    width: 28px;
+    height: 28px;
+    margin-bottom: 2px;
+  }
+  footer .footer-brand .brand-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #FFFFFF;
+  }
+  footer .footer-text strong { color: #EAF3EC; }
+
+  /* ---------- Mobile Responsiveness ---------- */
+  @media (max-width: 768px) {
+    header.hero, main, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+    header.hero h1 { font-size: 2.1rem; }
+    .hero-top { flex-direction: column; align-items: flex-start; }
+    .hero-right { align-items: flex-start; width: 100%; }
+    .hero-brand { align-items: flex-start; flex-direction: row-reverse; gap: 1rem; }
+    .hero-brand svg { width: 28px; height: 28px; margin-bottom: 0; }
+    .ledger { grid-template-columns: 1fr; }
+    .ledger .cell { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.18); }
+    .method-grid { grid-template-columns: 1fr; }
+    .stack-grid { grid-template-columns: 1fr 1fr; }
+    .meta-row { flex-direction: column; gap: 0.8rem; }
+    footer { flex-direction: column-reverse; align-items: flex-start; text-align: left; }
+    footer .footer-brand { align-items: flex-start; flex-direction: row-reverse; gap: 1rem; }
+    footer .footer-brand svg { width: 24px; height: 24px; }
+  }
+  
+  @media (max-width: 480px) {
+    header.hero, main, footer { padding-left: 1rem; padding-right: 1rem; }
+    header.hero h1 { font-size: 1.8rem; }
+    .eyebrow { font-size: 0.65rem; }
+    .stack-grid { grid-template-columns: 1fr; }
+    table { font-size: 0.8rem; min-width: 360px; }
+    .tag { font-size: 0.75rem; padding: 0.3rem 0.7rem; }
+    .ledger .value { font-size: 1.2rem; }
+    .ledger .cell { padding: 1.2rem 1rem; }
+    .feature-list li { font-size: 0.85rem; }
+    .privacy-note { font-size: 0.8rem; padding: 0.7rem 0.9rem; }
+  }
+
+  @media print {
+    body { background: #fff; }
+    .sheet { box-shadow: none; max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-left">
+        <p class="eyebrow">RUPSA Regulated NWDT Sacco Ltd · Credit Operations · Executive Summary</p>
+      </div>
+      <div class="hero-right">
+        <div class="hero-brand">
+          <!-- THA_o11 Logo -->
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="32" r="10" />
+            <rect x="26" y="16" width="12" height="32" rx="2" />
+            <rect x="42" y="2" width="12" height="46" rx="2" />
+          </svg>
+          <span class="brand-text">.THA_o11</span>
+        </div>
+      </div>
+    </div>
+    
+    <h1>Guarantor Split Calculator</h1>
+    <p class="subtitle">THA_1.1 — RPIP Smart Fair-Share Allocation Engine</p>
+    <div class="meta-row">
+      <div><strong>Prepared by</strong>Zacheas Mwatha Maina (THA011)</div>
+      <div><strong>Module</strong>THA_ Credit Operations Series</div>
+      <div><strong>Status</strong>Deployed — GitHub Pages ready</div>
+      <div><strong>Format</strong>Single-file web application</div>
+    </div>
+  </header>
+
+  <div class="ledger">
+    <div class="cell">
+      <div class="label">Worked Example — Required</div>
+      <div class="value">KES 265,000</div>
+    </div>
+    <div class="cell">
+      <div class="label">Allocated Across 4 Guarantors</div>
+      <div class="value">KES 265,000</div>
+    </div>
+    <div class="cell">
+      <div class="label">Coverage</div>
+      <div class="value gold">100%</div>
+    </div>
+  </div>
+
+  <main>
+
+    <section>
+      <h2><span class="num">01</span> The Problem</h2>
+      <p class="lede">A recurring appraisal problem, standardized.</p>
+      <p>When a member's loan needs guaranteeing, it's common to have several guarantors on file with very different available deposit balances. Deciding how much of the guarantee requirement each one should carry is a judgment call — and one that, made by hand, doesn't hold up well under scrutiny or repetition.</p>
+      <p>In day-to-day credit operations, that manual approach shows up as four consistent issues:</p>
+      <div class="tag-row">
+        <span class="tag">Inconsistent <span>— varies by officer, by day</span></span>
+        <span class="tag">Slow <span>— re-derived per application</span></span>
+        <span class="tag">Hard to defend <span>— no documented method</span></span>
+        <span class="tag">Risky at the edges <span>— can over-expose small savers</span></span>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">02</span> The Solution</h2>
+      <p>THA_1.1 is a free, single-file browser tool that removes the guesswork. A Credit Officer enters the required guarantee amount and each guarantor's available deposit, and the engine instantly computes two transparent, defensible split methods side by side.</p>
+      <ul class="feature-list">
+        <li><span class="mark">1</span><div><b>Supports up to 7 guarantors</b><span class="desc">Progressive input — starts at 5 slots, expands to the 7-guarantor underwriting cap.</span></div></li>
+        <li><span class="mark">2</span><div><b>Two allocation methods, computed live</b><span class="desc">Equal Capped and Proportional splits update instantly as figures are typed.</span></div></li>
+        <li><span class="mark">3</span><div><b>Real-time coverage gauge</b><span class="desc">Shows % of the requirement covered, and flags a shortfall with the exact gap.</span></div></li>
+        <li><span class="mark">4</span><div><b>Exposure % per guarantor</b><span class="desc">Flags anyone whose assigned share ties up a large share of their own savings.</span></div></li>
+        <li><span class="mark">5</span><div><b>Zero backend, zero cost</b><span class="desc">Runs entirely client-side. No server, no database, hosted free on GitHub Pages.</span></div></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2><span class="num">03</span> How It Works</h2>
+      <p>The engine offers two fair, explainable methods — the choice between them depends on whether the guarantor group prioritizes equal responsibility or proportional exposure.</p>
+
+      <div class="method-grid">
+        <div class="method-card">
+          <h3>Method 1 — Equal Capped (Water-Filling)</h3>
+          <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0;">Everyone contributes an equal share, capped at what they actually have.</p>
+          <ol>
+            <li>Divide the requirement equally among all active guarantors.</li>
+            <li>Anyone below that equal share contributes their full deposit and exits the pool.</li>
+            <li>The remaining requirement re-divides equally among the rest.</li>
+            <li>Repeat until every remaining share fits within its guarantor's deposit.</li>
+          </ol>
+        </div>
+        <div class="method-card">
+          <h3>Method 2 — Proportional (Weighted)</h3>
+          <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0;">Each guarantor pledges the same percentage of their own balance.</p>
+          <div class="formula">Share = ( Deposit ÷ Total Deposits ) × Loan Amount</div>
+          <p style="font-size:0.85rem; margin-top:0.6rem; margin-bottom:0;">Protects small savers from disproportionate exposure — a large-balance guarantor absorbs more KES, but the same percentage of their own savings as everyone else.</p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Guarantor</th><th>Deposit (KES)</th><th>Equal Capped</th><th>Proportional</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Guarantor 1</td><td>75,000</td><td>73,333</td><td>33,070</td></tr>
+            <tr><td>Guarantor 2</td><td>300,000</td><td>73,333</td><td>132,280</td></tr>
+            <tr><td>Guarantor 3</td><td>45,000</td><td>45,000</td><td>19,842</td></tr>
+            <tr><td>Guarantor 4</td><td>181,000</td><td>73,333</td><td>79,808</td></tr>
+            <tr class="total"><td>Total</td><td>601,000</td><td>265,000</td><td>265,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">04</span> Key Metrics Computed</h2>
+      <div class="table-responsive">
+        <table class="metric-table">
+          <thead><tr><th>Metric</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>Total Guarantee Needed</td><td>Target requirement to be covered</td></tr>
+            <tr><td>Total Available Pool</td><td>Sum of all active guarantors' pledged deposits</td></tr>
+            <tr><td>Coverage Ratio</td><td>Total Pool ÷ Needed — flags a shortfall instantly</td></tr>
+            <tr><td>Individual Guarantee Share</td><td>KES amount assigned per guarantor, under each method</td></tr>
+            <tr><td>Exposure %</td><td>Assigned Share ÷ that guarantor's own deposit</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">05</span> Tech Stack &amp; Deployment</h2>
+      <p>Built static, hosted free, live in minutes.</p>
+      <div class="stack-grid">
+        <div class="stack-item"><span class="code">JS</span><b>HTML5 + Vanilla JS</b><p>The full calculation engine, no build step</p></div>
+        <div class="stack-item"><span class="code">B5</span><b>Bootstrap 5</b><p>Layout, tabs and tables, via CDN</p></div>
+        <div class="stack-item"><span class="code">FX</span><b>Animate.css</b><p>Row and card transitions</p></div>
+        <div class="stack-item"><span class="code">GH</span><b>GitHub Pages</b><p>Free static hosting, KES 0/month</p></div>
+      </div>
+      <div class="deploy-box">
+        <b>Deploy in three steps</b>
+        <ol>
+          <li>Push <code>index.html</code>, <code>README.md</code> and <code>.github/</code> to a new GitHub repository</li>
+          <li>Settings → Pages → Source: <code>main</code> / <code>(root)</code> — or let the included GitHub Actions workflow auto-deploy on every push</li>
+          <li>Live at <code>your-username.github.io/THA_1.1_Guarantor_Split_Calculator</code></li>
+        </ol>
+      </div>
+      <p class="privacy-note">Data note: the tool accepts numeric deposit figures only. No member name, phone number, or identifying detail is entered, stored, or transmitted — all calculation happens client-side in the browser.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">06</span> Impact &amp; Next Steps</h2>
+      <p>THA_1.1 replaces an ad-hoc, per-officer calculation with one standard, transparent method — cutting appraisal time on multi-guarantor files and giving Credit Officers a documented, repeatable rationale to share with members.</p>
+      <p>It's one module in the broader THA_ credit-operations series, built to eventually converge with RUPSA's wider credit-decision tooling on shared member identifiers, alongside the portfolio's risk-scoring and early-warning engines.</p>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="footer-text">
+      <strong>THA_1.1 Guarantor Split Calculator</strong> · RPIP Smart Allocation Engine<br>
+      Zacheas Mwatha Maina (THA011) · Prowriters101 · github.com/THA011
+    </div>
+    <div class="footer-brand">
+      <!-- THA_o11 Logo -->
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="32" r="10" />
+        <rect x="26" y="16" width="12" height="32" rx="2" />
+        <rect x="42" y="2" width="12" height="46" rx="2" />
+      </svg>
+      <span class="brand-text">.THA_o11</span>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

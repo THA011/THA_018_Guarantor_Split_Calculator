@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>THA_1.1 — Live Guarantor Split Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #007A33;
+    --green-dark: #023B1B;
+    --green-mid: #005E27;
+    --gold: #C9A84C;
+    --ink: #1F2A22;
+    --muted: #5C6B62;
+    --paper: #FFFFFF;
+    --card: #F4F7F5;
+    --line: #E1E7E3;
+    --danger: #b91c1c;
+    --danger-bg: #fee2e2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #EEF2EF;
+    color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  
+  .sheet { 
+    max-width: 1100px; 
+    width: 100%; 
+    background: var(--paper); 
+    box-shadow: 0 1px 40px rgba(2,59,27,0.08);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- Header ---------- */
+  header.hero {
+    background: var(--green-dark);
+    color: #EAF3EC;
+    padding: 2rem 2.5rem 1.8rem;
+    position: relative;
+  }
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  .hero-left { flex: 1; min-width: 200px; }
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .hero-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .hero-brand svg {
+    fill: var(--gold);
+    width: 32px;
+    height: 32px;
+    margin-bottom: 2px;
+  }
+  .hero-brand .brand-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    color: #FFFFFF;
+  }
+
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin: 0 0 0.5rem;
+  }
+  header.hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 2.4rem;
+    line-height: 1.08;
+    margin: 0;
+    color: #FFFFFF;
+  }
+  header.hero .subtitle {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--gold);
+    margin: 0.3rem 0 0;
+  }
+
+  /* ---------- Main Layout ---------- */
+  main { 
+    padding: 2rem 2.5rem; 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    flex: 1;
+  }
+
+  /* ---------- INPUT SECTION ---------- */
+  .input-section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .input-section h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    margin: 0 0 1.5rem;
+    color: var(--green-mid);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .input-group {
+    margin-bottom: 1.2rem;
+  }
+  .input-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+    color: var(--muted);
+  }
+  .input-group input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    font-size: 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(0, 122, 51, 0.1);
+  }
+  .input-group input.highlight-input {
+    border-color: var(--gold);
+    background: #fffcf5;
+  }
+  .guarantor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+  }
+  .guarantor-input label {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .guarantor-input input {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-calc {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--green);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 0.5rem;
+  }
+  .btn-calc:hover { background: var(--green-mid); }
+  .btn-calc:active { transform: scale(0.98); }
+
+  /* ---------- OUTPUT SECTION ---------- */
+  .output-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .coverage-card {
+    background: var(--green-dark);
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .coverage-card .label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+  .coverage-card .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  .coverage-card .value.gold { color: var(--gold); }
+  .coverage-card .value.danger { color: #f87171; }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.2rem;
+  }
+  .result-card h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    color: var(--green-mid);
+    margin: 0 0 0.8rem;
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 0.5rem;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+    border-bottom: 1px dashed var(--line);
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row .g-name { font-weight: 500; }
+  .result-row .g-amount { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+  .result-row .g-exposure { font-size: 0.75rem; color: var(--muted); }
+  .exposure-warning {
+    color: var(--danger);
+    font-weight: 600;
+  }
+  .result-total {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 2px solid var(--green);
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    background: var(--green-dark);
+    color: #AFCBB9;
+    padding: 1.2rem 2.5rem;
+    font-size: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+  footer .footer-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  footer .footer-brand svg {
+    fill: var(--gold);
+    width: 24px;
+    height: 24px;
+    margin-bottom: 2px;
+  }
+  footer .footer-brand .brand-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #FFFFFF;
+  }
+  footer .footer-text strong { color: #EAF3EC; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    header.hero, main, footer { padding: 1.2rem; }
+    header.hero h1 { font-size: 1.8rem; }
+    .hero-top { flex-direction: column; align-items: flex-start; }
+    .hero-right { align-items: flex-start; width: 100%; }
+    .hero-brand { align-items: flex-start; flex-direction: row-reverse; gap: 0.8rem; }
+    .hero-brand svg { width: 24px; height: 24px; margin: 0; }
+    
+    .guarantor-grid { grid-template-columns: 1fr; }
+    .result-grid { grid-template-columns: 1fr; }
+    .coverage-card { flex-direction: column; align-items: flex-start; }
+    
+    footer { flex-direction: column-reverse; align-items: flex-start; text-align: left; }
+    footer .footer-brand { flex-direction: row-reverse; gap: 0.8rem; align-items: center; }
+    footer .footer-brand svg { width: 20px; height: 20px; }
+  }
+
+  @media print {
+    body { background: #fff; }
+    .sheet { box-shadow: none; max-width: 100%; }
+    .btn-calc { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-left">
+        <p class="eyebrow">RUPSA Regulated · Credit Operations</p>
+      </div>
+      <div class="hero-right">
+        <div class="hero-brand">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="32" r="10" />
+            <rect x="26" y="16" width="12" height="32" rx="2" />
+            <rect x="42" y="2" width="12" height="46" rx="2" />
+          </svg>
+          <span class="brand-text">.THA_o11</span>
+        </div>
+      </div>
+    </div>
+    <h1>Guarantor Split Calculator</h1>
+    <p class="subtitle">THA_1.1 — Live Interactive Demo</p>
+  </header>
+
+  <main>
+    <!-- ===== LEFT: INPUTS ===== -->
+    <section class="input-section">
+      <h2>📋 Enter Loan Details</h2>
+      
+      <div class="input-group">
+        <label for="loanAmount">Total Guarantee Required (KES)</label>
+        <input type="number" id="loanAmount" placeholder="e.g. 265000" value="265000" class="highlight-input" min="0">
+      </div>
+
+      <div class="input-group">
+        <label>Guarantor Deposits (KES)</label>
+        <div class="guarantor-grid" id="guarantorContainer">
+          <div class="guarantor-input"><label>G1</label><input type="number" class="g-deposit" value="75000" min="0"></div>
+          <div class="guarantor-input"><label>G2</label><input type="number" class="g-deposit" value="300000" min="0"></div>
+          <div class="guarantor-input"><label>G3</label><input type="number" class="g-deposit" value="45000" min="0"></div>
+          <div class="guarantor-input"><label>G4</label><input type="number" class="g-deposit" value="181000" min="0"></div>
+          <div class="guarantor-input"><label>G5</label><input type="number" class="g-deposit" value="" min="0" placeholder="Optional"></div>
+          <div class="guarantor-input"><label>G6</label><input type="number" class="g-deposit" value="" min="0" placeholder="Optional"></div>
+          <div class="guarantor-input"><label>G7</label><input type="number" class="g-deposit" value="" min="0" placeholder="Optional"></div>
+        </div>
+        <p style="font-size:0.75rem; color:var(--muted); margin-top:0.3rem;">Leave optional fields blank to exclude guarantors.</p>
+      </div>
+
+      <button class="btn-calc" id="calcBtn">⟳ Calculate Splits</button>
+    </section>
+
+    <!-- ===== RIGHT: OUTPUTS ===== -->
+    <section class="output-section" id="outputSection">
+      
+      <!-- Coverage Bar -->
+      <div class="coverage-card" id="coverageCard">
+        <div>
+          <div class="label">Total Pool / Coverage</div>
+          <div style="font-size:1.1rem; font-family:'IBM Plex Mono', monospace; opacity:0.9;" id="totalPoolDisplay">KES 601,000</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="label">Coverage Ratio</div>
+          <div class="value gold" id="coveragePercent">100%</div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="result-grid">
+        <div class="result-card" id="equalResult">
+          <h3>⚖️ Equal Capped</h3>
+          <div id="equalRows">
+            <div class="result-row"><span class="g-name">G1</span><span class="g-amount">KES 73,333</span><span class="g-exposure">(97.8%)</span></div>
+            <div class="result-row"><span class="g-name">G2</span><span class="g-amount">KES 73,333</span><span class="g-exposure">(24.4%)</span></div>
+            <div class="result-row"><span class="g-name">G3</span><span class="g-amount">KES 45,000</span><span class="g-exposure">(100%)</span></div>
+            <div class="result-row"><span class="g-name">G4</span><span class="g-amount">KES 73,333</span><span class="g-exposure">(40.5%)</span></div>
+            <div class="result-total"><span>Total</span><span>KES 265,000</span></div>
+          </div>
+        </div>
+
+        <div class="result-card" id="propResult">
+          <h3>📊 Proportional</h3>
+          <div id="propRows">
+            <div class="result-row"><span class="g-name">G1</span><span class="g-amount">KES 33,070</span><span class="g-exposure">(44.1%)</span></div>
+            <div class="result-row"><span class="g-name">G2</span><span class="g-amount">KES 132,280</span><span class="g-exposure">(44.1%)</span></div>
+            <div class="result-row"><span class="g-name">G3</span><span class="g-amount">KES 19,842</span><span class="g-exposure">(44.1%)</span></div>
+            <div class="result-row"><span class="g-name">G4</span><span class="g-amount">KES 79,808</span><span class="g-exposure">(44.1%)</span></div>
+            <div class="result-total"><span>Total</span><span>KES 265,000</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:0.8rem; color:var(--muted); border-top:1px solid var(--line); padding-top:0.8rem; text-align:center;">
+        * Exposure % = (Assigned Share ÷ Guarantor's Own Deposit)
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-text">
+      <strong>THA_1.1 Guarantor Split Calculator</strong> · Live Demo<br>
+      Zacheas Mwatha Maina (THA011) · Prowriters101
+    </div>
+    <div class="footer-brand">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="32" r="10" />
+        <rect x="26" y="16" width="12" height="32" rx="2" />
+        <rect x="42" y="2" width="12" height="46" rx="2" />
+      </svg>
+      <span class="brand-text">.THA_o11</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const loanInput = document.getElementById('loanAmount');
+    const depositInputs = document.querySelectorAll('.g-deposit');
+    const calcBtn = document.getElementById('calcBtn');
+
+    // Output elements
+    const totalPoolDisplay = document.getElementById('totalPoolDisplay');
+    const coveragePercent = document.getElementById('coveragePercent');
+    const equalRows = document.getElementById('equalRows');
+    const propRows = document.getElementById('propRows');
+
+    function formatCurrency(num) {
+      return 'KES ' + Number(num).toLocaleString('en-KE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function calculate() {
+      // 1. Get Loan Amount
+      const loanReq = parseFloat(loanInput.value) || 0;
+
+      // 2. Get Active Guarantors (ignore empty strings or 0)
+      const deposits = [];
+      depositInputs.forEach(input => {
+        const val = parseFloat(input.value);
+        if (!isNaN(val) && val > 0) {
+          deposits.push(val);
+        }
+      });
+
+      const count = deposits.length;
+      
+      // 3. Update Total Pool
+      const totalPool = deposits.reduce((a, b) => a + b, 0);
+      totalPoolDisplay.textContent = formatCurrency(totalPool);
+
+      // 4. Coverage Percentage
+      let coverage = 0;
+      if (loanReq > 0 && totalPool > 0) {
+        coverage = Math.min((totalPool / loanReq) * 100, 100);
+      } else if (loanReq === 0) {
+        coverage = 100; // No requirement, fully covered
+      }
+      
+      const coverageEl = coveragePercent;
+      coverageEl.textContent = coverage.toFixed(1) + '%';
+      
+      // Update coverage color
+      const coverageCard = document.getElementById('coverageCard');
+      if (coverage < 100 && loanReq > 0) {
+        coverageEl.className = 'value danger';
+        // Add shortfall text
+        const shortfall = loanReq - totalPool;
+        coverageCard.querySelector('div:last-child').innerHTML = 
+          `<div class="label">Coverage Ratio</div>
+           <div class="value danger">${coverage.toFixed(1)}%</div>
+           <div style="font-size:0.75rem; color:#f87171;">Shortfall: ${formatCurrency(shortfall)}</div>`;
+      } else {
+        coverageEl.className = 'value gold';
+        coverageCard.querySelector('div:last-child').innerHTML = 
+          `<div class="label">Coverage Ratio</div>
+           <div class="value gold">${coverage.toFixed(1)}%</div>`;
+      }
+
+      if (count === 0 || loanReq === 0) {
+        equalRows.innerHTML = '<div style="padding:0.5rem; color:var(--muted);">Add deposits and loan amount.</div>';
+        propRows.innerHTML = '<div style="padding:0.5rem; color:var(--muted);">Add deposits and loan amount.</div>';
+        return;
+      }
+
+      // ==========================================
+      // METHOD 1: Equal Capped (Water-filling)
+      // ==========================================
+      let remainingReq = loanReq;
+      let activeIndices = deposits.map((_, i) => i);
+      let equalShares = new Array(count).fill(0);
+
+      while (remainingReq > 0.01 && activeIndices.length > 0) {
+        let equalShare = remainingReq / activeIndices.length;
+        let changed = false;
+        
+        let newActive = [];
+        for (let idx of activeIndices) {
+          let deposit = deposits[idx];
+          let assigned = Math.min(equalShare, deposit);
+          equalShares[idx] = assigned;
+          remainingReq -= assigned;
+          
+          // If they couldn't fully pay their equal share, they're out
+          if (assigned < deposit - 0.01) {
+            newActive.push(idx); // stays active for next round
+          } else {
+            // They hit their cap
+            changed = true;
+          }
+        }
+        
+        // If no one hit a cap, we're done (remainder is 0)
+        if (!changed) break;
+        activeIndices = newActive;
+      }
+
+      // ==========================================
+      // METHOD 2: Proportional
+      // ==========================================
+      let propShares = new Array(count).fill(0);
+      if (totalPool > 0) {
+        for (let i = 0; i < count; i++) {
+          propShares[i] = (deposits[i] / totalPool) * loanReq;
+        }
+      }
+
+      // ==========================================
+      // RENDER RESULTS
+      // ==========================================
+      function renderRows(methodName, sharesArray, container) {
+        let html = '';
+        let totalAssigned = 0;
+        
+        for (let i = 0; i < count; i++) {
+          const share = sharesArray[i];
+          const deposit = deposits[i];
+          totalAssigned += share;
+          
+          const exposurePct = deposit > 0 ? (share / deposit) * 100 : 0;
+          let expClass = '';
+          if (exposurePct > 90) expClass = ' exposure-warning';
+          
+          html += `
+            <div class="result-row">
+              <span class="g-name">G${i+1}</span>
+              <span class="g-amount">${formatCurrency(share)}</span>
+              <span class="g-exposure${expClass}">(${exposurePct.toFixed(1)}%)</span>
+            </div>
+          `;
+        }
+        
+        // Total row
+        html += `
+          <div class="result-total">
+            <span>Total</span>
+            <span>${formatCurrency(totalAssigned)}</span>
+          </div>
+        `;
+        
+        container.innerHTML = html;
+      }
+
+      renderRows('Equal Capped', equalShares, equalRows);
+      renderRows('Proportional', propShares, propRows);
+    }
+
+    // Attach events
+    calcBtn.addEventListener('click', calculate);
+    
+    // Auto-calculate on input change
+    loanInput.addEventListener('input', calculate);
+    depositInputs.forEach(input => {
+      input.addEventListener('input', calculate);
+    });
+
+    // Initial calculation
+    calculate();
+  });
+</script>
+
+</body>
+</html>
