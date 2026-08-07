@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUPSA SACCO — Guarantor Allocation Engine</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Animate.css for smooth transitions -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        :root {
+            --rupsa-green: #007A33;
+            --rupsa-dark: #005E27;
+            --rupsa-gold: #C9A84C;
+        }
+        body { background-color: #f4f6f8; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .navbar { background-color: var(--rupsa-green); box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+        .card { border-radius: 12px; border: none; }
+        .card-header { background-color: var(--rupsa-green); color: white; font-weight: 700; border-radius: 12px 12px 0 0 !important; }
+        .btn-rupsa { background-color: var(--rupsa-green); color: white; font-weight: 600; border-radius: 8px; transition: all 0.3s ease; }
+        .btn-rupsa:hover { background-color: var(--rupsa-dark); color: white; transform: translateY(-1px); }
+        .progress-bar-rupsa { background-color: var(--rupsa-green); }
+        .badge-recommend { background-color: var(--rupsa-gold); color: #000; font-weight: 700; }
+        .table-highlight { background-color: #e8f5e9; font-weight: 700; }
+        .guarantor-row { transition: all 0.4s ease-in-out; }
+        footer { color: #6c757d; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">🟢 RUPSA SACCO — Smart Guarantor Allocation Engine</span>
+            <span class="badge bg-light text-dark fw-bold">THA_1.1 Module</span>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+        <div class="row">
+            <!-- Left Input Column -->
+            <div class="col-lg-5 mb-4">
+                <div class="card shadow-sm animate__animated animate__fadeInLeft">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>1. Loan & Guarantor Inputs</span>
+                        <span class="badge bg-white text-dark" id="slotCounter">5 / 7 Slots</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="loanAmount" class="form-label fw-bold text-secondary">Total Required Guarantee (KES):</label>
+                            <input type="number" id="loanAmount" class="form-control form-control-lg fw-bold" value="265000" oninput="calculateSplit()">
+                        </div>
+
+                        <!-- Real-time Coverage Gauge -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small fw-bold mb-1">
+                                <span>Deposit Coverage Gauge</span>
+                                <span id="gaugeText">0%</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div id="gaugeBar" class="progress-bar progress-bar-rupsa progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold text-secondary mb-0">Guarantor Deposits (KES):</label>
+                            <span class="text-muted small">Max 7</span>
+                        </div>
+
+                        <div id="guarantorsContainer">
+                            <!-- 5 Default Initial Entries -->
+                            <div class="input-group mb-2 guarantor-row animate__animated animate__fadeIn">
+                                <span class="input-group-text fw-bold">G1</span>
+                                <input type="number" class="form-control deposit-input" value="75000" placeholder="Available Deposit" oninput="calculateSplit()">
+                                <button class="btn btn-outline-danger" type="button" onclick="removeGuarantor(this)">×</button>
+                            </div>
+                            <div class="input-group mb-2 guarantor-row animate__animated animate__fadeIn">
+                                <span class="input-group-text fw-bold">G2</span>
+                                <input type="number" class="form-control deposit-input" value="300000" placeholder="Available Deposit" oninput="calculateSplit()">
+                                <button class="btn btn-outline-danger" type="button" onclick="removeGuarantor(this)">×</button>
+                            </div>
+                            <div class="input-group mb-2 guarantor-row animate__animated animate__fadeIn">
+                                <span class="input-group-text fw-bold">G3</span>
+                                <input type="number" class="form-control deposit-input" value="45000" placeholder="Available Deposit" oninput="calculateSplit()">
+                                <button class="btn btn-outline-danger" type="button" onclick="removeGuarantor(this)">×</button>
+                            </div>
+                            <div class="input-group mb-2 guarantor-row animate__animated animate__fadeIn">
+                                <span class="input-group-text fw-bold">G4</span>
+                                <input type="number" class="form-control deposit-input" value="181000" placeholder="Available Deposit" oninput="calculateSplit()">
+                                <button class="btn btn-outline-danger" type="button" onclick="removeGuarantor(this)">×</button>
+                            </div>
+                            <div class="input-group mb-2 guarantor-row animate__animated animate__fadeIn">
+                                <span class="input-group-text fw-bold">G5</span>
+                                <input type="number" class="form-control deposit-input" value="0" placeholder="Available Deposit" oninput="calculateSplit()">
+                                <button class="btn btn-outline-danger" type="button" onclick="removeGuarantor(this)">×</button>
+                            </div>
+                        </div>
+
+                        <!-- Progressive Add Button -->
+                        <div class="d-grid mt-3">
+                            <button id="addBtn" class="btn btn-outline-success btn-sm fw-bold" onclick="addGuarantor()">
+                                ➕ More Guarantors? (Add Slot)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Results Column -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm animate__animated animate__fadeInRight">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>2. Recommended Allocation Breakdown</span>
+                        <span class="badge badge-recommend" id="recBadge">Best Fair Option: Equal Capped</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="alertBox" class="alert alert-warning d-none animate__animated animate__shakeX"></div>
+
+                        <ul class="nav nav-pills mb-3" id="myTab" role="tablist">
+                            <li class="nav-item me-2">
+                                <button class="nav-link active fw-bold" id="equal-tab" data-bs-toggle="tab" data-bs-target="#equal-pane" type="button">Equal Capped (Recommended)</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link fw-bold" id="prop-tab" data-bs-toggle="tab" data-bs-target="#prop-pane" type="button">Proportional (Weighted)</button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="myTabContent">
+                            <!-- Equal Capped Tab -->
+                            <div class="tab-pane fade show active" id="equal-pane">
+                                <p class="text-muted small">Equal responsibility distribution. Smaller deposits contribute up to their maximum available savings while remaining deficit is shared equally by larger deposits.</p>
+                                <table class="table table-hover table-bordered align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Guarantor</th>
+                                            <th>Deposit (KES)</th>
+                                            <th>Assigned Guarantee</th>
+                                            <th>Exposure %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="equalTableBody"></tbody>
+                                </table>
+                            </div>
+
+                            <!-- Proportional Tab -->
+                            <div class="tab-pane fade" id="prop-pane">
+                                <p class="text-muted small">Weighted allocation based strictly on shareholding size (~equal percentage locked across all members).</p>
+                                <table class="table table-hover table-bordered align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Guarantor</th>
+                                            <th>Deposit (KES)</th>
+                                            <th>Assigned Guarantee</th>
+                                            <th>Exposure %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="propTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center mt-4">
+            THA_1.1 Guarantor Split Calculator — Prowriters101 / THA011 &middot; RPIP Smart Allocation Engine &middot; Built for RUPSA Regulated NWDT Sacco Ltd
+        </footer>
+    </div>
+
+    <!-- JavaScript Engine -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const MAX_GUARANTORS = 7;
+
+        function addGuarantor() {
+            const container = document.getElementById('guarantorsContainer');
+            const currentCount = container.children.length;
+
+            if (currentCount < MAX_GUARANTORS) {
+                const div = document.createElement('div');
+                div.className = 'input-group mb-2 guarantor-row animate__animated animate__fadeInUp';
+                div.innerHTML = `
+                    <span class="input-group-text fw-bold">G${currentCount + 1}</span>
+                    <input type="number" class="form-control deposit-input" value="0" placeholder="Available Deposit" oninput="calculateSplit()">
+                    <button class="btn btn-outline-danger" type="button" onclick="removeGuarantor(this)">×</button>
+                `;
+                container.appendChild(div);
+                updateUIState();
+                calculateSplit();
+            }
+        }
+
+        function removeGuarantor(btn) {
+            const container = document.getElementById('guarantorsContainer');
+            if (container.children.length > 1) {
+                btn.closest('.guarantor-row').remove();
+                updateUIState();
+                calculateSplit();
+            }
+        }
+
+        function updateUIState() {
+            const container = document.getElementById('guarantorsContainer');
+            const count = container.children.length;
+
+            // Renumber labels G1, G2...
+            const rows = container.querySelectorAll('.guarantor-row');
+            rows.forEach((row, idx) => {
+                row.querySelector('.input-group-text').textContent = `G${idx + 1}`;
+            });
+
+            document.getElementById('slotCounter').textContent = `${count} / ${MAX_GUARANTORS} Slots`;
+
+            const addBtn = document.getElementById('addBtn');
+            if (count >= MAX_GUARANTORS) {
+                addBtn.disabled = true;
+                addBtn.className = 'btn btn-secondary btn-sm fw-bold';
+                addBtn.textContent = 'Maximum Guarantors Reached (7/7)';
+            } else {
+                addBtn.disabled = false;
+                addBtn.className = 'btn btn-outline-success btn-sm fw-bold';
+                addBtn.textContent = '➕ More Guarantors? (Add Slot)';
+            }
+        }
+
+        function calculateSplit() {
+            const target = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const inputs = document.querySelectorAll('.deposit-input');
+            const deposits = Array.from(inputs).map(input => parseFloat(input.value) || 0);
+            const totalDeposits = deposits.reduce((a, b) => a + b, 0);
+
+            // Update Real-Time Coverage Gauge
+            const gaugePct = target > 0 ? Math.min(100, (totalDeposits / target) * 100).toFixed(1) : 0;
+            const gaugeBar = document.getElementById('gaugeBar');
+            gaugeBar.style.width = `${gaugePct}%`;
+            document.getElementById('gaugeText').textContent = `${gaugePct}% Covered`;
+
+            if (totalDeposits < target) {
+                gaugeBar.className = 'progress-bar bg-danger progress-bar-striped progress-bar-animated';
+            } else {
+                gaugeBar.className = 'progress-bar progress-bar-rupsa progress-bar-striped progress-bar-animated';
+            }
+
+            const alertBox = document.getElementById('alertBox');
+            if (totalDeposits < target) {
+                alertBox.classList.remove('d-none');
+                alertBox.innerHTML = `⚠️ <strong>Deficit Warning:</strong> Total Deposits (KES ${totalDeposits.toLocaleString()}) are LESS than Required Guarantee (KES ${target.toLocaleString()}). Shortfall: <strong>KES ${(target - totalDeposits).toLocaleString()}</strong>`;
+            } else {
+                alertBox.classList.add('d-none');
+            }
+
+            // 1. Proportional Calculation
+            const propShares = deposits.map(dep => (totalDeposits > 0) ? (dep / totalDeposits) * target : 0);
+            renderTable('propTableBody', deposits, propShares);
+
+            // 2. Equal Capped Iterative Allocation Algorithm (water-filling)
+            let remTarget = target;
+            let remIndices = deposits.map((_, i) => i);
+            let equalShares = new Array(deposits.length).fill(0);
+
+            while (remIndices.length > 0 && remTarget > 0) {
+                let equalShare = remTarget / remIndices.length;
+                let capped = false;
+
+                for (let i = remIndices.length - 1; i >= 0; i--) {
+                    let idx = remIndices[i];
+                    if (deposits[idx] <= equalShare) {
+                        equalShares[idx] = deposits[idx];
+                        remTarget -= deposits[idx];
+                        remIndices.splice(i, 1);
+                        capped = true;
+                    }
+                }
+
+                if (!capped) {
+                    remIndices.forEach(idx => {
+                        equalShares[idx] = equalShare;
+                    });
+                    remTarget = 0;
+                    break;
+                }
+            }
+            renderTable('equalTableBody', deposits, equalShares);
+        }
+
+        function renderTable(elementId, deposits, shares) {
+            const tbody = document.getElementById(elementId);
+            tbody.innerHTML = '';
+
+            let totalDep = 0, totalShare = 0;
+
+            deposits.forEach((dep, i) => {
+                const share = shares[i];
+                const pct = dep > 0 ? ((share / dep) * 100).toFixed(1) : 0;
+                totalDep += dep;
+                totalShare += share;
+
+                const row = document.createElement('tr');
+                row.className = 'animate__animated animate__fadeIn';
+                row.innerHTML = `
+                    <td><strong>Guarantor ${i + 1}</strong></td>
+                    <td>KES ${dep.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="fw-bold text-success">KES ${share.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td><span class="badge ${pct > 90 ? 'bg-warning text-dark' : 'bg-secondary'}">${pct}%</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Summary Row
+            const sumRow = document.createElement('tr');
+            sumRow.className = 'table-highlight';
+            sumRow.innerHTML = `
+                <td>TOTAL</td>
+                <td>KES ${totalDep.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="text-success">KES ${totalShare.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td><span class="badge bg-success">100%</span></td>
+            `;
+            tbody.appendChild(sumRow);
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            updateUIState();
+            calculateSplit();
+        };
+    </script>
+</body>
+</html>
